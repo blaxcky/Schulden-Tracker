@@ -12,7 +12,7 @@ export default function ConfirmDialog({ open, title, message, onConfirm, onCance
       <DialogContent>
         <DialogContentText>{message}</DialogContentText>
       </DialogContent>
-      <DialogActions>
+      <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button onClick={onCancel}>Abbrechen</Button>
         <Button onClick={onConfirm} color="error" variant="contained">
           Bestätigen
