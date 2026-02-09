@@ -73,7 +73,7 @@ export default function EditTransactionDialog({ open, transaction, onClose }) {
           />
         </Box>
       </DialogContent>
-      <DialogActions>
+      <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button onClick={onClose}>Abbrechen</Button>
         <Button onClick={handleSave} variant="contained" disabled={!amount || Number(amount) <= 0}>
           Speichern

@@ -74,7 +74,7 @@ export default function AddTransactionDialog({ open, onClose }) {
           />
         </Box>
       </DialogContent>
-      <DialogActions>
+      <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button onClick={handleClose}>Abbrechen</Button>
         <Button onClick={handleSave} variant="contained" disabled={!amount || Number(amount) <= 0}>
           Speichern
