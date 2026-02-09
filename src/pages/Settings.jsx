@@ -24,9 +24,12 @@ import { toggleRecurringCost, deleteRecurringCost } from '../db/operations'
 import { exportData, importData } from '../utils/exportImport'
 import { resetCache } from '../utils/serviceWorker'
 import { formatCurrency } from '../utils/format'
+import usePwaInstall from '../hooks/usePwaInstall'
+import InstallMobileIcon from '@mui/icons-material/InstallMobile'
 
 export default function Settings() {
   const recurringCosts = useRecurringCosts()
+  const { canInstall, isInstalled, promptInstall } = usePwaInstall()
   const [costDialogOpen, setCostDialogOpen] = useState(false)
   const [editCost, setEditCost] = useState(null)
   const [deleteCost, setDeleteCost] = useState(null)
@@ -164,6 +167,31 @@ export default function Settings() {
           </Box>
         </CardContent>
       </Card>
+
+      {/* PWA Install */}
+      {(canInstall || isInstalled) && (
+        <Card sx={{ mb: 2 }}>
+          <CardContent>
+            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+              App installieren
+            </Typography>
+            {isInstalled ? (
+              <Typography variant="body2" color="text.secondary">
+                Die App ist bereits installiert.
+              </Typography>
+            ) : (
+              <Button
+                startIcon={<InstallMobileIcon />}
+                variant="outlined"
+                onClick={promptInstall}
+                fullWidth
+              >
+                App auf Gerät installieren
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* App Info */}
       <Card>
