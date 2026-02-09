@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(git -C /Users/markusschwarz/Programmierung/Schulden-Tracker log --oneline --all)",
+      "Bash(git -C /Users/markusschwarz/Programmierung/Schulden-Tracker remote -v)",
+      "WebFetch(domain:vite.dev)",
+      "WebFetch(domain:dexie.org)",
+      "Bash(npm install:*)",
+      "Bash(node -e \"\nconst { createCanvas } = \\(\\(\\) => { try { return require\\(''canvas''\\); } catch { return { createCanvas: null }; } }\\)\\(\\);\nif \\(!createCanvas\\) {\n  // Fallback: Create minimal valid PNGs using raw bytes\n  const fs = require\\(''fs''\\);\n  \n  function createMinimalPNG\\(size\\) {\n    // We''ll create a simple colored square PNG\n    const { execSync } = require\\(''child_process''\\);\n    // Use sips on macOS to convert SVG concept to PNG\n    return null;\n  }\n  \n  console.log\\(''canvas not available, using alternative method''\\);\n  process.exit\\(1\\);\n}\n\")",
+      "Bash(node -e:*)",
+      "Bash(npm run build:*)",
+      "Bash(timeout 10 npm run dev:*)"
+    ]
+  },
+  "prefersReducedMotion": true
+}
