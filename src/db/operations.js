@@ -56,20 +56,45 @@ export async function processRecurringCosts() {
   const setting = await db.settings.get('lastRecurringCheck')
   if (setting?.value === currentMonth) return // Already processed this month
 
+  const months = getMonthsToProcess(setting?.value, currentMonth)
+  if (months.length === 0) return
+
   const activeCosts = await db.recurringCosts.where('active').equals(1).toArray()
 
-  for (const cost of activeCosts) {
-    const day = String(Math.min(cost.dayOfMonth, 28)).padStart(2, '0')
-    await db.transactions.add({
-      type: 'expense',
-      amount: cost.amount,
-      description: cost.description,
-      date: `${currentMonth}-${day}`,
-      createdAt: new Date().toISOString(),
-    })
+  for (const month of months) {
+    for (const cost of activeCosts) {
+      const day = String(Math.min(cost.dayOfMonth, 28)).padStart(2, '0')
+      await db.transactions.add({
+        type: 'expense',
+        amount: cost.amount,
+        description: cost.description,
+        date: `${month}-${day}`,
+        createdAt: new Date().toISOString(),
+      })
+    }
   }
 
   await db.settings.put({ key: 'lastRecurringCheck', value: currentMonth })
+}
+
+function getMonthsToProcess(lastCheck, currentMonth) {
+  if (!lastCheck) return [currentMonth]
+
+  const months = []
+  const [lastY, lastM] = lastCheck.split('-').map(Number)
+  const [curY, curM] = currentMonth.split('-').map(Number)
+
+  let y = lastY
+  let m = lastM + 1
+  if (m > 12) { m = 1; y++ }
+
+  while (y < curY || (y === curY && m <= curM)) {
+    months.push(`${y}-${String(m).padStart(2, '0')}`)
+    m++
+    if (m > 12) { m = 1; y++ }
+  }
+
+  return months
 }
 
 // --- Settings ---
