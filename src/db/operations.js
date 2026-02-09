@@ -24,13 +24,14 @@ export async function deleteTransaction(id) {
 // --- Recurring Costs ---
 
 export async function addRecurringCost({ amount, description, dayOfMonth }) {
-  return db.recurringCosts.add({
+  await db.recurringCosts.add({
     amount: Number(amount),
     description,
     dayOfMonth: Number(dayOfMonth),
     active: 1,
     createdAt: new Date().toISOString(),
   })
+  await createCurrentMonthTransaction({ amount: Number(amount), description, dayOfMonth: Number(dayOfMonth) })
 }
 
 export async function updateRecurringCost(id, changes) {
@@ -44,7 +45,27 @@ export async function deleteRecurringCost(id) {
 }
 
 export async function toggleRecurringCost(id, active) {
-  return db.recurringCosts.update(id, { active: active ? 1 : 0 })
+  await db.recurringCosts.update(id, { active: active ? 1 : 0 })
+  if (active) {
+    const cost = await db.recurringCosts.get(id)
+    if (cost) await createCurrentMonthTransaction(cost)
+  }
+}
+
+async function createCurrentMonthTransaction(cost) {
+  const now = new Date()
+  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  const setting = await db.settings.get('lastRecurringCheck')
+  if (setting?.value !== currentMonth) return
+
+  const day = String(Math.min(cost.dayOfMonth, 28)).padStart(2, '0')
+  await db.transactions.add({
+    type: 'expense',
+    amount: cost.amount,
+    description: cost.description,
+    date: `${currentMonth}-${day}`,
+    createdAt: new Date().toISOString(),
+  })
 }
 
 // --- Recurring Check ---
