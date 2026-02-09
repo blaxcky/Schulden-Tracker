@@ -2,6 +2,12 @@ import { useState, useEffect } from 'react'
 
 let deferredPrompt = null
 
+// Event sofort auf Modul-Ebene abfangen, damit es nicht verpasst wird
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault()
+  deferredPrompt = e
+})
+
 export default function usePwaInstall() {
   const [canInstall, setCanInstall] = useState(!!deferredPrompt)
 
@@ -23,6 +29,10 @@ export default function usePwaInstall() {
 
     window.addEventListener('beforeinstallprompt', handler)
     window.addEventListener('appinstalled', installedHandler)
+
+    // Falls das Event schon vor dem Mount gefeuert hat
+    if (deferredPrompt) setCanInstall(true)
+
     return () => {
       window.removeEventListener('beforeinstallprompt', handler)
       window.removeEventListener('appinstalled', installedHandler)
