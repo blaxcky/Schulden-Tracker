@@ -38,7 +38,7 @@ export default function RecurringCostDialog({ open, cost, onClose }) {
   }
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs" sx={{ '& .MuiDialog-container': { alignItems: 'flex-start' } }} PaperProps={{ sx: { mt: 4 } }}>
       <DialogTitle>{isEdit ? 'Kosten bearbeiten' : 'Neue wiederkehrende Kosten'}</DialogTitle>
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
