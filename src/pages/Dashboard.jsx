@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react'
+import { useState, useEffect } from 'react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Card from '@mui/material/Card'
@@ -10,17 +10,13 @@ import AddIcon from '@mui/icons-material/Add'
 import BalanceCard from '../components/BalanceCard'
 import TransactionItem from '../components/TransactionItem'
 import AddTransactionDialog from '../components/AddTransactionDialog'
-import { useTransactions, useBalance, useMonthStats } from '../hooks/useTransactions'
+import { useTransactions, useBalance } from '../hooks/useTransactions'
 import { processRecurringCosts } from '../db/operations'
-import { formatCurrency } from '../utils/format'
-
-const BalanceChart = lazy(() => import('../components/BalanceChart'))
 
 export default function Dashboard() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const transactions = useTransactions()
   const balance = useBalance()
-  const { expenses, payments } = useMonthStats()
 
   useEffect(() => {
     processRecurringCosts()
@@ -35,30 +31,6 @@ export default function Dashboard() {
       </Typography>
 
       <BalanceCard balance={balance} />
-
-      <Card sx={{ mb: 2 }}>
-        <CardContent>
-          <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-            Dieser Monat
-          </Typography>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Box>
-              <Typography variant="body2" color="text.secondary">Ausgaben</Typography>
-              <Typography variant="h6" color="error.main">{formatCurrency(expenses)}</Typography>
-            </Box>
-            <Box sx={{ textAlign: 'right' }}>
-              <Typography variant="body2" color="text.secondary">Rückzahlungen</Typography>
-              <Typography variant="h6" color="success.main">{formatCurrency(payments)}</Typography>
-            </Box>
-          </Box>
-        </CardContent>
-      </Card>
-
-      {transactions.length > 0 && (
-        <Suspense fallback={null}>
-          <BalanceChart transactions={transactions} />
-        </Suspense>
-      )}
 
       <Card>
         <CardContent sx={{ pb: 0, '&:last-child': { pb: 0 } }}>

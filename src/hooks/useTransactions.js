@@ -20,22 +20,3 @@ export function useBalance() {
     return balance
   }, []) ?? 0
 }
-
-export function useMonthStats() {
-  return useLiveQuery(async () => {
-    const now = new Date()
-    const prefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
-    const monthly = await db.transactions
-      .where('date')
-      .startsWith(prefix)
-      .toArray()
-
-    let expenses = 0
-    let payments = 0
-    for (const t of monthly) {
-      if (t.type === 'expense') expenses += t.amount
-      else payments += t.amount
-    }
-    return { expenses, payments }
-  }, []) ?? { expenses: 0, payments: 0 }
-}
