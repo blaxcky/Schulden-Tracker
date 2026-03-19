@@ -1,3 +1,3 @@
 # AGENTS
 
-- Always commit when done with something.
+- Always commit and push when done with something.
