@@ -16,7 +16,7 @@ export default function BalanceCard({ balance }) {
           {formatCurrency(balance)}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-          {balance > 0 ? 'Mama schuldet dir' : balance < 0 ? 'Du hast Guthaben' : 'Ausgeglichen'}
+          {balance > 0 ? 'Mama schuldet dir' : balance < 0 ? 'Mama hat Guthaben bei dir' : 'Ausgeglichen'}
         </Typography>
       </CardContent>
     </Card>
