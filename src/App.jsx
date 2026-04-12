@@ -2,6 +2,7 @@ import { useState, lazy, Suspense } from 'react'
 import CircularProgress from '@mui/material/CircularProgress'
 import Box from '@mui/material/Box'
 import Layout from './components/Layout'
+import { PersonProvider } from './context/PersonContext'
 
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const Transactions = lazy(() => import('./pages/Transactions'))
@@ -22,10 +23,12 @@ export default function App() {
   const Page = pages[tab]
 
   return (
-    <Layout tab={tab} onTabChange={setTab}>
-      <Suspense fallback={<Loading />}>
-        <Page />
-      </Suspense>
-    </Layout>
+    <PersonProvider>
+      <Layout tab={tab} onTabChange={setTab}>
+        <Suspense fallback={<Loading />}>
+          <Page />
+        </Suspense>
+      </Layout>
+    </PersonProvider>
   )
 }

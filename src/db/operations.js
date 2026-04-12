@@ -1,9 +1,31 @@
 import { db } from './db'
 
+// --- Persons ---
+
+export async function addPerson(name) {
+  return db.persons.add({
+    name,
+    createdAt: new Date().toISOString(),
+  })
+}
+
+export async function updatePerson(id, name) {
+  return db.persons.update(id, { name })
+}
+
+export async function deletePerson(id) {
+  await db.transaction('rw', db.persons, db.transactions, db.recurringCosts, async () => {
+    await db.transactions.where('personId').equals(id).delete()
+    await db.recurringCosts.where('personId').equals(id).delete()
+    await db.persons.delete(id)
+  })
+}
+
 // --- Transactions ---
 
-export async function addTransaction({ type, amount, description, date }) {
+export async function addTransaction({ personId, type, amount, description, date }) {
   return db.transactions.add({
+    personId,
     type,
     amount: Number(amount),
     description: description || '',
@@ -23,15 +45,16 @@ export async function deleteTransaction(id) {
 
 // --- Recurring Costs ---
 
-export async function addRecurringCost({ amount, description, dayOfMonth }) {
+export async function addRecurringCost({ personId, amount, description, dayOfMonth }) {
   await db.recurringCosts.add({
+    personId,
     amount: Number(amount),
     description,
     dayOfMonth: Number(dayOfMonth),
     active: 1,
     createdAt: new Date().toISOString(),
   })
-  await createCurrentMonthTransaction({ amount: Number(amount), description, dayOfMonth: Number(dayOfMonth) })
+  await createCurrentMonthTransaction(personId, { amount: Number(amount), description, dayOfMonth: Number(dayOfMonth) })
 }
 
 export async function updateRecurringCost(id, changes) {
@@ -48,11 +71,11 @@ export async function toggleRecurringCost(id, active) {
   await db.recurringCosts.update(id, { active: active ? 1 : 0 })
   if (active) {
     const cost = await db.recurringCosts.get(id)
-    if (cost) await createCurrentMonthTransaction(cost)
+    if (cost) await createCurrentMonthTransaction(cost.personId, cost)
   }
 }
 
-async function createCurrentMonthTransaction(cost) {
+async function createCurrentMonthTransaction(personId, cost) {
   const now = new Date()
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
   const setting = await db.settings.get('lastRecurringCheck')
@@ -60,6 +83,7 @@ async function createCurrentMonthTransaction(cost) {
 
   const day = String(Math.min(cost.dayOfMonth, 28)).padStart(2, '0')
   await db.transactions.add({
+    personId,
     type: 'expense',
     amount: cost.amount,
     description: cost.description,
@@ -86,6 +110,7 @@ export async function processRecurringCosts() {
     for (const cost of activeCosts) {
       const day = String(Math.min(cost.dayOfMonth, 28)).padStart(2, '0')
       await db.transactions.add({
+        personId: cost.personId,
         type: 'expense',
         amount: cost.amount,
         description: cost.description,

@@ -7,8 +7,10 @@ import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 import Box from '@mui/material/Box'
 import { addRecurringCost, updateRecurringCost } from '../db/operations'
+import { usePersonContext } from '../context/PersonContext'
 
 export default function RecurringCostDialog({ open, cost, onClose }) {
+  const { selectedId } = usePersonContext()
   const [amount, setAmount] = useState('')
   const [description, setDescription] = useState('')
   const [dayOfMonth, setDayOfMonth] = useState('1')
@@ -32,7 +34,8 @@ export default function RecurringCostDialog({ open, cost, onClose }) {
     if (isEdit) {
       await updateRecurringCost(cost.id, { amount, description, dayOfMonth: day })
     } else {
-      await addRecurringCost({ amount, description, dayOfMonth: day })
+      if (!selectedId) return
+      await addRecurringCost({ personId: selectedId, amount, description, dayOfMonth: day })
     }
     onClose()
   }

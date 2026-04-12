@@ -5,10 +5,12 @@ import Paper from '@mui/material/Paper'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong'
 import SettingsIcon from '@mui/icons-material/Settings'
+import PersonSelector from './PersonSelector'
 
 export default function Layout({ tab, onTabChange, children }) {
   return (
     <Box sx={{ pb: '56px', minHeight: '100dvh' }}>
+      <PersonSelector />
       {children}
       <Paper
         sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1200 }}

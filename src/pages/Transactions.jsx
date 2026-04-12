@@ -15,11 +15,13 @@ import AddTransactionDialog from '../components/AddTransactionDialog'
 import EditTransactionDialog from '../components/EditTransactionDialog'
 import ConfirmDialog from '../components/ConfirmDialog'
 import { useTransactions } from '../hooks/useTransactions'
+import { usePersonContext } from '../context/PersonContext'
 import { deleteTransaction } from '../db/operations'
 import { formatMonth } from '../utils/format'
 
 export default function Transactions() {
-  const transactions = useTransactions()
+  const { selectedId } = usePersonContext()
+  const transactions = useTransactions(selectedId)
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('all')
   const [addOpen, setAddOpen] = useState(false)

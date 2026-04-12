@@ -9,17 +9,19 @@ import ToggleButton from '@mui/material/ToggleButton'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import Box from '@mui/material/Box'
 import { addTransaction } from '../db/operations'
+import { usePersonContext } from '../context/PersonContext'
 import { todayISO } from '../utils/format'
 
 export default function AddTransactionDialog({ open, onClose }) {
+  const { selectedId } = usePersonContext()
   const [type, setType] = useState('expense')
   const [amount, setAmount] = useState('')
   const [description, setDescription] = useState('')
   const [date, setDate] = useState(todayISO())
 
   const handleSave = async () => {
-    if (!amount || Number(amount) <= 0) return
-    await addTransaction({ type, amount, description, date })
+    if (!amount || Number(amount) <= 0 || !selectedId) return
+    await addTransaction({ personId: selectedId, type, amount, description, date })
     handleClose()
   }
 

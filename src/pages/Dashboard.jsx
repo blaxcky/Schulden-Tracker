@@ -11,12 +11,14 @@ import BalanceCard from '../components/BalanceCard'
 import TransactionItem from '../components/TransactionItem'
 import AddTransactionDialog from '../components/AddTransactionDialog'
 import { useTransactions, useBalance } from '../hooks/useTransactions'
+import { usePersonContext } from '../context/PersonContext'
 import { processRecurringCosts } from '../db/operations'
 
 export default function Dashboard() {
   const [dialogOpen, setDialogOpen] = useState(false)
-  const transactions = useTransactions()
-  const balance = useBalance()
+  const { selectedId, selectedPerson } = usePersonContext()
+  const transactions = useTransactions(selectedId)
+  const balance = useBalance(selectedId)
 
   useEffect(() => {
     processRecurringCosts()
@@ -30,7 +32,7 @@ export default function Dashboard() {
         Dashboard
       </Typography>
 
-      <BalanceCard balance={balance} />
+      <BalanceCard balance={balance} personName={selectedPerson?.name} />
 
       <Card>
         <CardContent sx={{ pb: 0, '&:last-child': { pb: 0 } }}>

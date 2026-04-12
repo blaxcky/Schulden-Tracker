@@ -18,9 +18,11 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload'
 import FileUploadIcon from '@mui/icons-material/FileUpload'
 import CachedIcon from '@mui/icons-material/Cached'
 import RecurringCostDialog from '../components/RecurringCostDialog'
+import PersonDialog from '../components/PersonDialog'
 import ConfirmDialog from '../components/ConfirmDialog'
 import { useRecurringCosts } from '../hooks/useRecurringCosts'
-import { toggleRecurringCost, deleteRecurringCost } from '../db/operations'
+import { usePersonContext } from '../context/PersonContext'
+import { toggleRecurringCost, deleteRecurringCost, deletePerson } from '../db/operations'
 import { exportData, importData } from '../utils/exportImport'
 import { resetCache } from '../utils/serviceWorker'
 import { formatCurrency } from '../utils/format'
@@ -28,11 +30,15 @@ import usePwaInstall from '../hooks/usePwaInstall'
 import InstallMobileIcon from '@mui/icons-material/InstallMobile'
 
 export default function Settings() {
-  const recurringCosts = useRecurringCosts()
+  const { persons, selectedId } = usePersonContext()
+  const recurringCosts = useRecurringCosts(selectedId)
   const { canInstall, isInstalled, promptInstall } = usePwaInstall()
   const [costDialogOpen, setCostDialogOpen] = useState(false)
   const [editCost, setEditCost] = useState(null)
   const [deleteCost, setDeleteCost] = useState(null)
+  const [personDialogOpen, setPersonDialogOpen] = useState(false)
+  const [editPerson, setEditPerson] = useState(null)
+  const [deletePersonTarget, setDeletePersonTarget] = useState(null)
   const [importConfirm, setImportConfirm] = useState(false)
   const [cacheConfirm, setCacheConfirm] = useState(false)
   const fileInputRef = useRef(null)
@@ -52,6 +58,23 @@ export default function Settings() {
     if (deleteCost) {
       await deleteRecurringCost(deleteCost.id)
       setDeleteCost(null)
+    }
+  }
+
+  const handleEditPerson = (person) => {
+    setEditPerson(person)
+    setPersonDialogOpen(true)
+  }
+
+  const handleClosePersonDialog = () => {
+    setPersonDialogOpen(false)
+    setEditPerson(null)
+  }
+
+  const handleDeletePerson = async () => {
+    if (deletePersonTarget) {
+      await deletePerson(deletePersonTarget.id)
+      setDeletePersonTarget(null)
     }
   }
 
@@ -77,6 +100,49 @@ export default function Settings() {
       <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
         Einstellungen
       </Typography>
+
+      {/* Persons */}
+      <Card sx={{ mb: 2 }}>
+        <CardContent sx={{ pb: 0, '&:last-child': { pb: 0 } }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+            <Typography variant="subtitle2" color="text.secondary">
+              Personen
+            </Typography>
+            <IconButton size="small" onClick={() => setPersonDialogOpen(true)}>
+              <AddIcon />
+            </IconButton>
+          </Box>
+
+          {persons.length === 0 ? (
+            <Typography variant="body2" color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
+              Keine Personen vorhanden
+            </Typography>
+          ) : (
+            <List disablePadding>
+              {persons.map((person, i) => (
+                <Box key={person.id}>
+                  {i > 0 && <Divider />}
+                  <ListItem sx={{ pr: 10 }}>
+                    <ListItemText primary={person.name} />
+                    <ListItemSecondaryAction>
+                      <IconButton size="small" onClick={() => handleEditPerson(person)}>
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() => setDeletePersonTarget(person)}
+                        disabled={persons.length <= 1}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </ListItemSecondaryAction>
+                  </ListItem>
+                </Box>
+              ))}
+            </List>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Recurring Costs */}
       <Card sx={{ mb: 2 }}>
@@ -203,6 +269,20 @@ export default function Settings() {
       </Card>
 
       {/* Dialogs */}
+      <PersonDialog
+        open={personDialogOpen}
+        person={editPerson}
+        onClose={handleClosePersonDialog}
+      />
+
+      <ConfirmDialog
+        open={!!deletePersonTarget}
+        title="Person löschen"
+        message={`Möchtest du "${deletePersonTarget?.name}" wirklich löschen? Alle zugehörigen Transaktionen und wiederkehrenden Kosten werden ebenfalls gelöscht.`}
+        onConfirm={handleDeletePerson}
+        onCancel={() => setDeletePersonTarget(null)}
+      />
+
       <RecurringCostDialog
         open={costDialogOpen}
         cost={editCost}
