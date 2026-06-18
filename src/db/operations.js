@@ -34,6 +34,20 @@ export async function addTransaction({ personId, type, amount, description, date
   })
 }
 
+export async function addTransactions(transactions) {
+  const createdAt = new Date().toISOString()
+  const rows = transactions.map(({ personId, type, amount, description, date }) => ({
+    personId,
+    type,
+    amount: Number(amount),
+    description: description || '',
+    date,
+    createdAt,
+  }))
+
+  return db.transaction('rw', db.transactions, async () => db.transactions.bulkAdd(rows))
+}
+
 export async function updateTransaction(id, changes) {
   if (changes.amount !== undefined) changes.amount = Number(changes.amount)
   return db.transactions.update(id, changes)
